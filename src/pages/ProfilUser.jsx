@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 
 const ProfilUser = () => {
-  const [user, setUser] = useState({
+  const [user] = useState({
     nama: "John Doe",
     email: "johndoe@example.com",
-    password: "",
+    password: "********",
     jenisKelamin: "Laki-laki",
     nip: "123456789",
     jabatan: "Staff",
@@ -12,47 +12,36 @@ const ProfilUser = () => {
     asalDinas: "Diskominfo",
   });
 
-  const handleChange = (e) => {
-    setUser({ ...user, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert("Profil berhasil diperbarui!");
-  };
-
   return (
     <div className="min-h-screen bg-[#e8f3f6] font-sans flex justify-center items-start py-20">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white rounded-xl shadow-md p-8 w-full max-w-lg"
-      >
+      <div className="bg-white rounded-xl shadow-md p-8 w-full max-w-lg">
         <h1 className="text-2xl font-bold mb-6 text-[#093757]">Profil User</h1>
 
+        {/* ==== DATA USER READ-ONLY ==== */}
         {[
-          { label: "Nama", name: "nama" },
-          { label: "Email", name: "email", type: "email" },
-          { label: "Password", name: "password", type: "password" },
-          { label: "Jenis Kelamin", name: "jenisKelamin" },
-          { label: "NIP", name: "nip" },
-          { label: "Jabatan/Role", name: "jabatan" },
-          { label: "Unit Kerja", name: "unitKerja" },
-          { label: "Asal Dinas", name: "asalDinas" },
+          { label: "Nama", value: user.nama },
+          { label: "Email", value: user.email },
+          { label: "Password", value: user.password },
+          { label: "Jenis Kelamin", value: user.jenisKelamin },
+          { label: "NIP", value: user.nip },
+          { label: "Jabatan / Role", value: user.jabatan },
+          { label: "Unit Kerja", value: user.unitKerja },
+          { label: "Asal Dinas", value: user.asalDinas },
         ].map((field, idx) => (
           <div className="mb-4" key={idx}>
             <label className="block text-sm font-medium text-[#093757] mb-1">
               {field.label}
             </label>
             <input
-              type={field.type || "text"}
-              name={field.name}
-              value={user[field.name]}
-              onChange={handleChange}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#093757]"
+              type="text"
+              value={field.value}
+              readOnly
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-gray-100 
+              text-gray-700 cursor-not-allowed"
             />
           </div>
         ))}
-      </form>
+      </div>
     </div>
   );
 };

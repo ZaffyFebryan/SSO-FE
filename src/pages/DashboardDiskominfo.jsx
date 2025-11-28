@@ -70,7 +70,7 @@ const DashboardDiskominfo = () => {
       {/* ==== HERO SECTION ==== */}
       <section className="flex flex-col md:flex-row items-center justify-between px-12 py-20 max-w-[1200px] mx-auto w-full">
         <div className="max-w-lg text-[#093757]">
-          <h1 className="text-4xl font-bold mb-4 leading-tight">Admin Dashboard Diskominfo</h1>
+          <h1 className="text-4xl font-bold mb-4 leading-tight">Diskominfo Dashboard</h1>
           <p className="text-[#294659] text-base leading-relaxed">
             Monitor user activity, manage accounts, and oversee IT services from one secure dashboard.
           </p>
@@ -81,30 +81,42 @@ const DashboardDiskominfo = () => {
       </section>
 
       {/* ==== ADMIN ACTION CARDS ==== */}
-      <section className="max-w-6xl mx-auto px-6 py-12">
-        <h2 className="text-3xl font-bold text-[#093757] mb-8">Admin Actions</h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            {
-              title: "Tambah User",
-              desc: "Tambah data user.",
-              action: () => navigate("/manajemen-akun"),
-            },
-            {
-              title: "Kelola User",
-              desc: "Lihat dan kelola data user yang sudah ada.",
-              action: () => navigate("/data-user"),
-            },
-          ].map((card, idx) => (
+      <section className="w-full bg-[#eaf5f7] py-20">
+        <h2 className="text-3xl font-bold text-[#093757] text-center mb-12">
+          Admin Actions
+        </h2>
+
+        {/* Wrapper agar kartu tetap berada di tengah */}
+        <div className="flex justify-center w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-3xl w-full px-6">
+            
+            {/* Card 1 */}
             <div
-              key={idx}
-              onClick={card.action}
-              className="bg-white rounded-xl shadow-md p-6 cursor-pointer hover:shadow-xl transition"
+              onClick={() => navigate("/manajemen-akun")}
+              className="bg-white rounded-2xl shadow-md p-8 cursor-pointer hover:shadow-xl transition-all hover:scale-[1.02]"
             >
-              <h3 className="text-xl font-semibold mb-2 text-[#093757]">{card.title}</h3>
-              <p className="text-sm text-[#294659]">{card.desc}</p>
+              <h3 className="text-2xl font-semibold text-[#093757] mb-3">
+                Add User
+              </h3>
+              <p className="text-[#294659] text-sm">
+                Add new user data via the account registration form
+              </p>
             </div>
-          ))}
+
+            {/* Card 2 */}
+            <div
+              onClick={() => navigate("/data-user")}
+              className="bg-white rounded-2xl shadow-md p-8 cursor-pointer hover:shadow-xl transition-all hover:scale-[1.02]"
+            >
+              <h3 className="text-2xl font-semibold text-[#093757] mb-3">
+                Manage User
+              </h3>
+              <p className="text-[#294659] text-sm">
+                View, manage, and update existing user data
+              </p>
+            </div>
+
+          </div>
         </div>
       </section>
 
