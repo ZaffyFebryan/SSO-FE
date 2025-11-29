@@ -1,11 +1,19 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function VerifyCode() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { verifyEmail, resetPassword } = useAuth();
+  
+  const email = location.state?.email || localStorage.getItem('resetEmail') || "";
+  const type = location.state?.type || 'reset'; // 'reset' or 'verify'
+  
   const [code, setCode] = useState(new Array(6).fill("")); // 6 digit kode
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [timer, setTimer] = useState(5 * 60); // 5 minutes countdown in seconds
 
   const inputsRef = useRef([]);
@@ -49,7 +57,7 @@ export default function VerifyCode() {
     return `${m}:${s}`;
   };
 
-  const handleVerify = (e) => {
+  const handleVerify = async (e) => {
     e.preventDefault();
     const enteredCode = code.join("");
     if (enteredCode.length < 6) {
@@ -57,23 +65,53 @@ export default function VerifyCode() {
       return;
     }
 
-    if (enteredCode === "123456") {
-      setError("");
-      setSuccess(true);
-      setTimeout(() => {
-        navigate("/set-new-password");
-      }, 2000);
-    } else {
-      setError("Verification code incorrect");
+    setLoading(true);
+    setError("");
+
+    try {
+      if (type === 'verify') {
+        // Verifikasi email registrasi
+        const result = await verifyEmail({ email, otp: enteredCode });
+        if (result.success) {
+          setSuccess(true);
+          setTimeout(() => {
+            navigate("/");
+          }, 2000);
+        } else {
+          setError(result.message || "Verification code incorrect");
+        }
+      } else {
+        // Untuk reset password, simpan OTP dan lanjut ke set password
+        localStorage.setItem('resetOTP', enteredCode);
+        setSuccess(true);
+        setTimeout(() => {
+          navigate("/set-new-password", { state: { email, otp: enteredCode } });
+        }, 1000);
+      }
+    } catch (err) {
+      setError("Terjadi kesalahan. Silakan coba lagi.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleResend = () => {
-    setCode(new Array(6).fill(""));
-    inputsRef.current[0].focus();
-    setError("");
-    setTimer(5 * 60);
-    alert("Verification code resent.");
+  const handleResend = async () => {
+    try {
+      if (type === 'reset') {
+        const result = await resetPassword(email);
+        if (result.success) {
+          setCode(new Array(6).fill(""));
+          inputsRef.current[0].focus();
+          setError("");
+          setTimer(5 * 60);
+          alert("Verification code resent.");
+        } else {
+          setError(result.message);
+        }
+      }
+    } catch (err) {
+      setError("Gagal mengirim ulang kode.");
+    }
   };
 
   return (

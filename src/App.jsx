@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
@@ -15,23 +17,58 @@ import UpdateDataUser from "./pages/UpdateDataUser.jsx";
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
+    <AuthProvider>
+      <Router>
+        <Routes>
+        {/* Public routes - tidak perlu authentication */}
         <Route path="/" element={<LoginPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/verify-code" element={<VerifyCode />} />
         <Route path="/set-new-password" element={<SetNewPassword />} />
 
-        {/* Route tambahan untuk SSO user & admin */}
-        <Route path="/profil-user" element={<ProfilUser />} />
-        <Route path="/profil-diskominfo" element={<ProfilDiskominfo />} />
-        <Route path="/dashboard-diskominfo" element={<DashboardDiskominfo />} />
-        <Route path="/manajemen-akun" element={<ManajemenAkun />} />
-        <Route path="/data-user" element={<DataUser />} />
-        <Route path="/detail-data-user/:id" element={<DetailDataUser />} />
-        <Route path="/update-data-user/:id" element={<UpdateDataUser />} />
+        {/* Protected routes - perlu authentication */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/profil-user" element={
+          <ProtectedRoute>
+            <ProfilUser />
+          </ProtectedRoute>
+        } />
+        <Route path="/profil-diskominfo" element={
+          <ProtectedRoute>
+            <ProfilDiskominfo />
+          </ProtectedRoute>
+        } />
+        <Route path="/dashboard-diskominfo" element={
+          <ProtectedRoute>
+            <DashboardDiskominfo />
+          </ProtectedRoute>
+        } />
+        <Route path="/manajemen-akun" element={
+          <ProtectedRoute>
+            <ManajemenAkun />
+          </ProtectedRoute>
+        } />
+        <Route path="/data-user" element={
+          <ProtectedRoute>
+            <DataUser />
+          </ProtectedRoute>
+        } />
+        <Route path="/detail-data-user/:id" element={
+          <ProtectedRoute>
+            <DetailDataUser />
+          </ProtectedRoute>
+        } />
+        <Route path="/update-data-user/:id" element={
+          <ProtectedRoute>
+            <UpdateDataUser />
+          </ProtectedRoute>
+        } />
       </Routes>
     </Router>
+    </AuthProvider>
   );
 }

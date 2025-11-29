@@ -1,22 +1,45 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const navigate = useNavigate();
+  const { resetPassword } = useAuth();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
+    setSuccess("");
 
     if (!email) {
-      alert("Masukkan email terlebih dahulu!");
+      setError("Masukkan email terlebih dahulu!");
+      setLoading(false);
       return;
     }
 
-    // simulasi kirim email reset
-    setTimeout(() => {
-      navigate("/verify-code");
-    }, 1000);
+    try {
+      const result = await resetPassword(email);
+      
+      if (result.success) {
+        setSuccess(result.message);
+        // Simpan email untuk digunakan di halaman verify code
+        localStorage.setItem('resetEmail', email);
+        setTimeout(() => {
+          navigate("/verify-code", { state: { email, type: 'reset' } });
+        }, 1500);
+      } else {
+        setError(result.message);
+      }
+    } catch (err) {
+      setError("Terjadi kesalahan. Silakan coba lagi.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -67,6 +90,17 @@ export default function ResetPassword() {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="w-full max-w-sm flex flex-col gap-4">
+        {error && (
+          <div className="bg-red-500/20 border border-red-500 text-white px-4 py-3 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="bg-green-500/20 border border-green-500 text-white px-4 py-3 rounded-lg text-sm">
+            {success}
+          </div>
+        )}
+        
         <input
           type="email"
           placeholder="eg : test123456@gmail.com"
@@ -75,12 +109,14 @@ export default function ResetPassword() {
           className="w-full py-2 px-4 rounded-lg text-[#274964] focus:outline-none focus:ring-2 focus:ring-[#274964]"
           style={{ backgroundColor: "white" }}
           required
+          disabled={loading}
         />
         <button
           type="submit"
-          className="bg-[#d8eefe] rounded-md py-2 text-[#274964] font-semibold hover:bg-[#b5d7fb] transition"
+          className="bg-[#d8eefe] rounded-md py-2 text-[#274964] font-semibold hover:bg-[#b5d7fb] transition disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={loading}
         >
-          Send
+          {loading ? "Sending..." : "Send"}
         </button>
       </form>
     </div>

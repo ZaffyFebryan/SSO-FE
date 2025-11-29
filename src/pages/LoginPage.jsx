@@ -1,18 +1,51 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login, isAuthenticated, user } = useAuth();
 
-  const handleSubmit = (e) => {
+  // Redirect jika sudah login
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === "admin_kota") {
+        navigate("/dashboard-diskominfo", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (email === "admin@sso.com" && password === "123456") {
-      navigate("/dashboard");
-    } else {
-      alert("Email atau password salah!");
+    setLoading(true);
+    setError("");
+
+    try {
+      const result = await login({ email, password });
+      
+      if (result.success) {
+        // Check user role dan redirect sesuai role
+        const userRole = result.data?.user?.role;
+        
+        if (userRole === "admin_kota") {
+          navigate("/dashboard-diskominfo");
+        } else {
+          navigate("/dashboard");
+        }
+      } else {
+        setError(result.message);
+      }
+    } catch (err) {
+      setError("Terjadi kesalahan. Silakan coba lagi.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -28,6 +61,12 @@ export default function LoginPage() {
 
           {/* LOGIN FORM */}
           <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-red-500/20 border border-red-500 text-white px-4 py-3 rounded-xl text-sm">
+                {error}
+              </div>
+            )}
+            
             <div>
               <label className="text-white text-sm font-medium mb-2 block">
                 Email
@@ -39,6 +78,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-5 py-3.5 rounded-xl bg-white/90 text-gray-700 shadow-md focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -54,11 +94,13 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-5 py-3.5 rounded-xl bg-white/90 text-gray-700 shadow-md focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all"
                   required
+                  disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => navigate("/reset-password")}
                   className="absolute right-4 top-3 text-xs text-sky-900 hover:text-sky-700 font-semibold transition"
+                  disabled={loading}
                 >
                   Forgot Password?
                 </button>
@@ -67,9 +109,10 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              className="w-full bg-white text-[#0f2a48] font-semibold py-3.5 rounded-xl shadow-md hover:bg-gray-100 transition"
+              className="w-full bg-white text-[#0f2a48] font-semibold py-3.5 rounded-xl shadow-md hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading}
             >
-              Login
+              {loading ? "Loading..." : "Login"}
             </button>
 
             <div className="text-center text-white/80 text-xs font-semibold tracking-wide">

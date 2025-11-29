@@ -1,8 +1,15 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const DashboardDiskominfo = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/");
+  };
 
   // Fungsi smooth scroll (sama seperti dashboard user)
   const scrollToSection = (id) => {
@@ -58,7 +65,7 @@ const DashboardDiskominfo = () => {
           </button>
           <button
             className="bg-[#093757] text-white text-sm px-5 py-2 rounded-md hover:bg-[#0e4f76] transition"
-            onClick={() => navigate("/")}
+            onClick={handleLogout}
           >
             Logout
           </button>

@@ -1,14 +1,24 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function SetNewPassword() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  const { confirmResetPassword } = useAuth();
+  
+  const email = location.state?.email || localStorage.getItem('resetEmail') || "";
+  const otp = location.state?.otp || localStorage.getItem('resetOTP') || "";
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setSuccess("");
 
     if (newPassword.length < 8) {
       setError("Password must be at least 8 characters");
@@ -20,9 +30,38 @@ export default function SetNewPassword() {
       return;
     }
 
-    setError("");
-    alert("Password berhasil diubah! Silakan login kembali.");
-    navigate("/");
+    if (!email || !otp) {
+      setError("Data tidak lengkap. Silakan ulangi proses reset password.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const result = await confirmResetPassword({
+        email,
+        otp,
+        password: newPassword,
+        password_confirmation: confirmPassword,
+      });
+
+      if (result.success) {
+        setSuccess(result.message);
+        // Hapus data temporary
+        localStorage.removeItem('resetEmail');
+        localStorage.removeItem('resetOTP');
+        
+        setTimeout(() => {
+          navigate("/");
+        }, 2000);
+      } else {
+        setError(result.message || "Reset password gagal");
+      }
+    } catch (err) {
+      setError("Terjadi kesalahan. Silakan coba lagi.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -83,6 +122,17 @@ export default function SetNewPassword() {
         className="flex flex-col gap-4 w-full max-w-xs"
         noValidate
       >
+        {error && (
+          <div className="bg-red-500/20 border border-red-500 text-white px-4 py-3 rounded-lg text-sm text-center">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="bg-green-500/20 border border-green-500 text-white px-4 py-3 rounded-lg text-sm text-center">
+            {success}
+          </div>
+        )}
+        
         <input
           type="password"
           placeholder="New Password *"
@@ -91,6 +141,7 @@ export default function SetNewPassword() {
           className="w-full py-2 px-4 rounded-full text-[#274964] focus:outline-none focus:ring-2 focus:ring-[#274964]"
           style={{ backgroundColor: "white" }}
           required
+          disabled={loading}
         />
         <input
           type="password"
@@ -100,15 +151,15 @@ export default function SetNewPassword() {
           className="w-full py-2 px-4 rounded-full text-[#274964] focus:outline-none focus:ring-2 focus:ring-[#274964]"
           style={{ backgroundColor: "white" }}
           required
+          disabled={loading}
         />
-        {error && (
-          <p className="text-red-500 text-sm font-medium text-center">{error}</p>
-        )}
+        
         <button
           type="submit"
-          className="bg-[#d8eefe] rounded-full py-2 mt-2 text-[#274964] font-semibold hover:bg-[#b5d7fb] transition"
+          className="bg-[#d8eefe] rounded-full py-2 mt-2 text-[#274964] font-semibold hover:bg-[#b5d7fb] transition disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={loading}
         >
-          Change Password
+          {loading ? "Processing..." : "Change Password"}
         </button>
       </form>
     </div>

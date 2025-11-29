@@ -1,9 +1,30 @@
 // src/pages/DashboardPage.jsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const DashboardPage = () => {
     const navigate = useNavigate();
+    const { logout } = useAuth();
+    const [menuApps, setMenuApps] = useState([]);
+
+    useEffect(() => {
+      // Ambil menu dari localStorage (disimpan saat login/refresh user)
+      const menuData = localStorage.getItem('menu');
+      if (menuData) {
+        try {
+          const parsedMenu = JSON.parse(menuData);
+          setMenuApps(parsedMenu);
+        } catch (err) {
+          console.error('Error parsing menu data:', err);
+        }
+      }
+    }, []);
+
+    const handleLogout = async () => {
+      await logout();
+      navigate("/");
+    };
 
   // fungsi untuk smooth scroll
   const scrollToSection = (id) => {
@@ -62,7 +83,7 @@ const DashboardPage = () => {
 
       <button
         className="bg-[#093757] text-white text-sm px-5 py-2 rounded-md hover:bg-[#0e4f76] transition"
-        onClick={() => navigate("/")}
+        onClick={handleLogout}
       >
         Logout
       </button>
@@ -95,40 +116,40 @@ const DashboardPage = () => {
       {/* ==== OUR SERVICES (tambahkan ID agar bisa discroll ke sini) ==== */}
       <section id="applications" className="text-center py-16 bg-[#aee1ea]">
         <h2 className="text-3xl font-bold mb-12 text-[#093757]">Our Services Apps</h2>
-        <div className="grid md:grid-cols-3 gap-10 px-8 md:px-24 max-w-6xl mx-auto">
-          {[
-            {
-              title: "SIPRIMA",
-              logo: "src/assets/siprima.png",
-              desc: "Aset Management System",
-            },
-            {
-              title: "SINDRA",
-              logo: "src/assets/sindra.png",
-              desc: "Service Desk Management",
-            },
-            {
-              title: "SIMANTIC",
-              logo: "src/assets/simantic.png",
-              desc: "Change & Configuration Management",
-            },
-          ].map((app, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-xl shadow-md hover:shadow-xl transition p-10 flex flex-col items-center gap-4 border border-gray-200"
-            >
-              <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
-                <img
-                  src={app.logo}
-                  alt={app.title}
-                  className="w-16 h-16 object-contain"
-                />
+        
+        {menuApps.length === 0 ? (
+          <div className="text-[#294659] text-lg">
+            Tidak ada aplikasi yang tersedia untuk user Anda.
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-3 gap-10 px-8 md:px-24 max-w-6xl mx-auto">
+            {menuApps.map((app, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-xl shadow-md hover:shadow-xl transition p-10 flex flex-col items-center gap-4 border border-gray-200 cursor-pointer"
+                onClick={() => app.url && window.open(app.url, '_blank')}
+              >
+                <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
+                  {app.logo ? (
+                    <img
+                      src={app.logo}
+                      alt={app.name}
+                      className="w-16 h-16 object-contain"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.parentElement.innerHTML = '<span class="text-3xl">📱</span>';
+                      }}
+                    />
+                  ) : (
+                    <span className="text-3xl">📱</span>
+                  )}
+                </div>
+                <h3 className="font-semibold text-xl text-[#093757]">{app.name || 'App'}</h3>
+                <p className="text-sm text-[#294659] mt-1">{app.description || '-'}</p>
               </div>
-              <h3 className="font-semibold text-xl text-[#093757]">{app.title}</h3>
-              <p className="text-sm text-[#294659] mt-1">{app.desc}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* ==== REPORT SECTION ==== */}
