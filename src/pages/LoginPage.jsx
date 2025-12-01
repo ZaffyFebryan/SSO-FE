@@ -10,6 +10,7 @@ import {
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -121,7 +122,7 @@ export default function LoginPage() {
               </label>
               <div className="relative">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="Enter Your Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -130,12 +131,19 @@ export default function LoginPage() {
                 />
                 <button
                   type="button"
-                  onClick={() => navigate("/reset-password")}
-                  className="absolute right-4 top-3 text-xs text-sky-900 hover:text-sky-700 font-semibold transition"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-sky-900 hover:text-sky-700 transition"
                 >
-                  Forgot Password?
+                  {showPassword ? "Sembunyikan" : "Intip"}
                 </button>
               </div>
+              <button
+                type="button"
+                onClick={() => navigate("/reset-password")}
+                className="text-xs text-white/80 hover:text-white mt-2 underline-offset-2 underline"
+              >
+                Forgot Password?
+              </button>
             </div>
 
             <button

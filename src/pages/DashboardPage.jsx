@@ -1,5 +1,5 @@
 // src/pages/DashboardPage.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   fetchProfile,
@@ -36,6 +36,8 @@ const GENDER_OPTIONS = [
   { value: "laki_laki", label: "Laki - Laki" },
   { value: "perempuan", label: "Perempuan" },
 ];
+
+const STAFF_USERS_PER_PAGE = 10;
 
 const normalizeGenderValue = (value) => {
   if (!value) {
@@ -119,6 +121,21 @@ const formatTitleCase = (value) => {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
+const formatReadableDate = (value) => {
+  if (!value) {
+    return "-";
+  }
+  try {
+    return new Intl.DateTimeFormat("id-ID", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }).format(new Date(value));
+  } catch {
+    return value;
+  }
+};
+
 const DashboardPage = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(() => getStoredUser());
@@ -145,6 +162,19 @@ const DashboardPage = () => {
   const [profileSubmitting, setProfileSubmitting] = useState(false);
   const [passwordSubmitting, setPasswordSubmitting] = useState(false);
   const [accountSubmitting, setAccountSubmitting] = useState(false);
+  const [staffUsers, setStaffUsers] = useState([]);
+  const [staffUsersLoading, setStaffUsersLoading] = useState(false);
+  const [staffUsersError, setStaffUsersError] = useState("");
+  const [staffUsersMeta, setStaffUsersMeta] = useState({
+    current_page: 1,
+    last_page: 1,
+    per_page: STAFF_USERS_PER_PAGE,
+    total: 0,
+  });
+  const [staffUserPage, setStaffUserPage] = useState(1);
+  const [staffUserSearchInput, setStaffUserSearchInput] = useState("");
+  const [staffUserSearch, setStaffUserSearch] = useState("");
+  const [staffUsersReloadKey, setStaffUsersReloadKey] = useState(0);
 
   useEffect(() => {
     let ignore = false;
@@ -263,12 +293,21 @@ const DashboardPage = () => {
 
   const isProfileModalOpen = activeModal === "profile";
   const isAddAccountModalOpen = activeModal === "addAccount";
-  const isStaff =
-    (user?.role_slugs || []).includes("staff") ||
-    (user?.roles || []).some(
-      (roleItem) => roleItem?.role?.toString().toLowerCase() === "staff"
+  const isUserManagementModalOpen = activeModal === "userManagement";
+  const isStaff = useMemo(() => {
+    if (!user) {
+      return false;
+    }
+    if ((user.role_slugs || []).includes("staff")) {
+      return true;
+    }
+
+    return (user.roles || []).some(
+      (roleItem) =>
+        roleItem?.role?.toString().trim().toLowerCase() === "staff"
     );
-  const canEditProfile = isStaff;
+  }, [user]);
+  const canEditProfile = Boolean(user);
   const canEditPassword = true;
   const passwordFieldsDisabled = !isPasswordEditing;
   const primaryRole =
@@ -281,6 +320,69 @@ const DashboardPage = () => {
     formatTitleCase(profileForm.role || primaryRole || "") ||
     "Belum ditetapkan";
   const profileGenderLabel = getGenderLabel(profileForm.gender);
+
+  useEffect(() => {
+    if (!isStaff) {
+      setStaffUsers([]);
+      setStaffUsersMeta({
+        current_page: 1,
+        last_page: 1,
+        per_page: STAFF_USERS_PER_PAGE,
+        total: 0,
+      });
+      setStaffUsersLoading(false);
+      setStaffUsersError("");
+      return;
+    }
+
+    let ignore = false;
+    setStaffUsersLoading(true);
+    setStaffUsersError("");
+
+    const params = new URLSearchParams({
+      page: staffUserPage.toString(),
+      per_page: STAFF_USERS_PER_PAGE.toString(),
+    });
+
+    if (staffUserSearch.trim()) {
+      params.set("search", staffUserSearch.trim());
+    }
+
+    apiRequest(`/v1/staff/users?${params.toString()}`)
+      .then((response) => {
+        if (ignore) {
+          return;
+        }
+        const meta = response?.meta ?? {};
+        setStaffUsers(response?.data ?? []);
+        setStaffUsersMeta({
+          current_page: meta.current_page ?? staffUserPage,
+          last_page: meta.last_page ?? 1,
+          per_page: meta.per_page ?? STAFF_USERS_PER_PAGE,
+          total: meta.total ?? (response?.data?.length ?? 0),
+        });
+
+        if (meta.last_page && staffUserPage > meta.last_page) {
+          setStaffUserPage(meta.last_page);
+        }
+      })
+      .catch((err) => {
+        if (ignore) {
+          return;
+        }
+        setStaffUsers([]);
+        setStaffUsersError(err.message || "Gagal memuat daftar akun staff.");
+      })
+      .finally(() => {
+        if (!ignore) {
+          setStaffUsersLoading(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [isStaff, staffUserPage, staffUserSearch, staffUsersReloadKey]);
   const handleResetAccountForm = () => {
     setNewAccount(buildEmptyAccountForm());
     setAccountErrors({});
@@ -312,8 +414,11 @@ const DashboardPage = () => {
     setIsPasswordEditing(false);
   };
 
-  const closeModal = () => {
+  const closeModal = (options = { reset: true }) => {
     setActiveModal(null);
+    if (options.reset === false) {
+      return;
+    }
     handleResetAccountForm();
     handleResetProfileForm();
     handleResetPasswordForm();
@@ -329,6 +434,48 @@ const DashboardPage = () => {
   const handleAccountChange = (field) => (event) => {
     const value = event.target.value;
     setNewAccount((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const openUserManagementModal = () => {
+    if (!isStaff) {
+      return;
+    }
+    setActiveModal("userManagement");
+  };
+
+  const handleStaffSearchInput = (event) => {
+    setStaffUserSearchInput(event.target.value);
+  };
+
+  const handleStaffSearchSubmit = (event) => {
+    event.preventDefault();
+    setStaffUserPage(1);
+    setStaffUserSearch(staffUserSearchInput.trim());
+  };
+
+  const handleStaffSearchReset = () => {
+    setStaffUserSearchInput("");
+    setStaffUserSearch("");
+    setStaffUserPage(1);
+  };
+
+  const handleStaffPageChange = (direction) => {
+    setStaffUserPage((prev) => {
+      const next = prev + direction;
+      if (next < 1) {
+        return 1;
+      }
+
+      if (staffUsersMeta.last_page && next > staffUsersMeta.last_page) {
+        return staffUsersMeta.last_page;
+      }
+
+      return next;
+    });
+  };
+
+  const handleRefreshStaffUsers = () => {
+    setStaffUsersReloadKey((prev) => prev + 1);
   };
 
   const toggleProfileEditing = () => {
@@ -425,6 +572,7 @@ const DashboardPage = () => {
       setAccountErrors({});
       handleResetAccountForm();
       setAccountFeedback(payload?.message || "Akun baru berhasil dibuat.");
+      handleRefreshStaffUsers();
     } catch (err) {
       const errors = err.data?.errors;
       if (errors) {
@@ -597,6 +745,17 @@ const DashboardPage = () => {
           >
             Applications
           </li>
+          {isStaff && (
+            <li>
+              <button
+                type="button"
+                onClick={openUserManagementModal}
+                className="hover:text-[#25577a] cursor-pointer transition"
+              >
+                User Management
+              </button>
+            </li>
+          )}
           <li
             onClick={() => scrollToSection("reports")}
             className="hover:text-[#25577a] cursor-pointer transition"
@@ -645,6 +804,24 @@ const DashboardPage = () => {
           <p className="text-[#294659] text-base leading-relaxed">
             Access and manage assets, tickets, and configurations seamlessly with one secure login.
           </p>
+          {isStaff && (
+            <div className="mt-6 flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={openUserManagementModal}
+                className="rounded-xl bg-[#093757] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0e4f76]"
+              >
+                Kelola Akun Staff
+              </button>
+              <button
+                type="button"
+                onClick={handleStartAddAccount}
+                className="rounded-xl border border-[#093757] px-6 py-3 text-sm font-semibold text-[#093757] transition hover:bg-[#093757] hover:text-white"
+              >
+                Tambah Akun
+              </button>
+            </div>
+          )}
         </div>
         <div className="mt-10 md:mt-0">
           <img
@@ -846,7 +1023,7 @@ const DashboardPage = () => {
           <div className="relative w-full max-w-3xl rounded-2xl bg-white p-8 shadow-2xl">
             <button
               type="button"
-              onClick={closeModal}
+              onClick={() => closeModal({ reset: false })}
               className="absolute right-5 top-5 text-[#6a889f] transition hover:text-[#093757]"
               aria-label="Tutup informasi pengguna"
             >
@@ -1177,6 +1354,197 @@ const DashboardPage = () => {
                 Tambahkan Akun
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {isUserManagementModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="relative w-full max-w-6xl rounded-2xl bg-white p-8 shadow-2xl max-h-[90vh]">
+            <button
+              type="button"
+              onClick={() => closeModal({ reset: false })}
+              className="absolute right-5 top-5 text-[#6a889f] transition hover:text-[#093757]"
+              aria-label="Tutup manajemen akun"
+            >
+              &times;
+            </button>
+            <div className="flex flex-col gap-6 h-full overflow-y-auto pr-1">
+              <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#6a889f]">
+                    Staff Access
+                  </p>
+                  <h2 className="text-3xl font-bold text-[#093757] mt-2">
+                    User Management
+                  </h2>
+                  <p className="text-[#294659] max-w-2xl mt-2">
+                    Pantau akun di tenant Anda, lakukan pencarian cepat, dan kontrol akses aplikasi SIPRIMA
+                    tanpa meninggalkan dashboard.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3 w-full lg:w-auto">
+                  <button
+                    type="button"
+                    onClick={handleRefreshStaffUsers}
+                    disabled={staffUsersLoading}
+                    className={`rounded-xl border border-[#093757] px-5 py-2 text-sm font-semibold text-[#093757] transition hover:bg-[#093757] hover:text-white ${
+                      staffUsersLoading ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                  >
+                    {staffUsersLoading ? "Memuat..." : "Refresh daftar"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleStartAddAccount}
+                    className="rounded-xl bg-[#093757] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#0e4f76]"
+                  >
+                    Tambah Akun Baru
+                  </button>
+                </div>
+              </div>
+
+              <form
+                onSubmit={handleStaffSearchSubmit}
+                className="flex flex-col md:flex-row items-stretch md:items-end gap-4"
+              >
+                <div className="flex-1">
+                  <label className="text-sm font-semibold text-[#093757]" htmlFor="staff-search-modal">
+                    Cari akun (nama, email, atau NIP)
+                  </label>
+                  <input
+                    id="staff-search-modal"
+                    type="text"
+                    value={staffUserSearchInput}
+                    onChange={handleStaffSearchInput}
+                    className="mt-2 w-full rounded-xl border border-[#c8dceb] bg-white px-4 py-2 text-sm text-[#0f2a48] focus:border-[#093757] focus:outline-none focus:ring-2 focus:ring-[#93c5fd]"
+                    placeholder="Contoh: Budi atau 19781211"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    type="submit"
+                    className="rounded-xl bg-[#093757] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#0e4f76]"
+                  >
+                    Cari
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleStaffSearchReset}
+                    className="rounded-xl border border-[#093757] px-5 py-2 text-sm font-semibold text-[#093757] transition hover:bg-[#093757] hover:text-white"
+                  >
+                    Reset
+                  </button>
+                </div>
+              </form>
+
+              {staffUsersError && (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {staffUsersError}
+                </div>
+              )}
+
+              <div className="rounded-2xl bg-white shadow-lg border border-[#e0ecf6] overflow-hidden">
+                {staffUsersLoading ? (
+                  <div className="p-10 text-center text-[#093757] text-base">
+                    Memuat daftar akun staff...
+                  </div>
+                ) : staffUsers.length === 0 ? (
+                  <div className="p-10 text-center text-[#294659] text-base">
+                    Tidak ada akun yang cocok dengan pencarian Anda.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-[#d7e6f1] text-left">
+                      <thead className="bg-[#eef5fb] text-[#0f2a48] text-xs font-semibold uppercase tracking-wide">
+                        <tr>
+                          <th className="px-6 py-4">Nama & Email</th>
+                          <th className="px-6 py-4">Role Utama</th>
+                          <th className="px-6 py-4">Unit & Dinas</th>
+                          <th className="px-6 py-4">NIP</th>
+                          <th className="px-6 py-4">Terdaftar</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#eef5fb] text-sm text-[#0f2a48]">
+                        {staffUsers.map((member) => {
+                          const primaryStaffRole =
+                            member?.roles?.[0]?.role ||
+                            (member?.role_slugs && member.role_slugs.length > 0
+                              ? member.role_slugs[0]
+                              : "Belum diatur");
+                          const staffProfile = member?.profile || {};
+
+                          return (
+                            <tr key={member.id} className="hover:bg-[#f7fbff] transition">
+                              <td className="px-6 py-4">
+                                <p className="font-semibold text-[#093757]">{member.name}</p>
+                                <p className="text-xs text-[#6a889f]">{member.email}</p>
+                              </td>
+                              <td className="px-6 py-4">
+                                <span className="inline-flex items-center rounded-full bg-[#e8f2fb] px-3 py-1 text-xs font-semibold text-[#0f2a48]">
+                                  {formatTitleCase(primaryStaffRole)}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4">
+                                <p className="font-medium text-[#093757]">
+                                  {staffProfile.unit_kerja || "-"}
+                                </p>
+                                <p className="text-xs text-[#6a889f]">
+                                  {staffProfile.asal_dinas || "Belum diatur"}
+                                </p>
+                              </td>
+                              <td className="px-6 py-4 text-[#294659]">
+                                {staffProfile.nip || "-"}
+                              </td>
+                              <td className="px-6 py-4 text-[#294659]">
+                                {formatReadableDate(member.created_at)}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+                <p className="text-sm text-[#294659]">
+                  Halaman {staffUsersMeta.current_page} dari {staffUsersMeta.last_page} •{" "}
+                  {staffUsersMeta.total} akun terdaftar
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleStaffPageChange(-1)}
+                    disabled={staffUsersLoading || staffUsersMeta.current_page <= 1}
+                    className={`rounded-xl border border-[#093757] px-5 py-2 text-sm font-semibold text-[#093757] transition hover:bg-[#093757] hover:text-white ${
+                      staffUsersLoading || staffUsersMeta.current_page <= 1
+                        ? "opacity-40 cursor-not-allowed"
+                        : ""
+                    }`}
+                  >
+                    Sebelumnya
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleStaffPageChange(1)}
+                    disabled={
+                      staffUsersLoading ||
+                      staffUsersMeta.current_page >= staffUsersMeta.last_page
+                    }
+                    className={`rounded-xl bg-[#093757] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#0e4f76] ${
+                      staffUsersLoading ||
+                      staffUsersMeta.current_page >= staffUsersMeta.last_page
+                        ? "opacity-40 cursor-not-allowed"
+                        : ""
+                    }`}
+                  >
+                    Selanjutnya
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
