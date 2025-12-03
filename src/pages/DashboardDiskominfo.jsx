@@ -93,7 +93,7 @@ const DashboardDiskominfo = () => {
         </div>
 
         <div className="mt-10 md:mt-0">
-          <img src="src/assets/dashboard.png" className="w-64 md:w-96 mx-auto" />
+          <img src="/images/dashboard.png" alt="dashboard" className="w-64 md:w-96 mx-auto" />
         </div>
       </section>
 

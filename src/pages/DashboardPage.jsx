@@ -110,7 +110,7 @@ const DashboardPage = () => {
         </div>
 
         <img
-          src="src/assets/dashboard.png"
+          src="/images/dashboard.png"
           alt="dashboard"
           className="w-full md:w-1/2 max-w-md"
         />
