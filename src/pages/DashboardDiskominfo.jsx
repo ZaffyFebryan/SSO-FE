@@ -121,9 +121,9 @@ const DashboardDiskominfo = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {[
-            { title: "SIPRIMA", logo: "src/assets/siprima.png", desc: "Aset Management System" },
-            { title: "SINDRA", logo: "src/assets/sindra.png", desc: "Service Desk Management" },
-            { title: "SIMANTIC", logo: "src/assets/simantic.png", desc: "Change & Configuration Management" },
+            { title: "SIPRIMA", logo: "/images/siprima.png", desc: "Aset Management System" },
+            { title: "SINDRA", logo: "/images/sindra.png", desc: "Service Desk Management" },
+            { title: "SIMANTIC", logo: "/images/simantic.png", desc: "Change & Configuration Management" },
           ].map((app, index) => (
             <div key={index} className="service-card">
               <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center">

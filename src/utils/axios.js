@@ -41,7 +41,7 @@ axiosInstance.interceptors.response.use(
           // Unauthorized - token expired atau invalid
           localStorage.removeItem('token');
           localStorage.removeItem('user');
-          window.location.href = '/login';
+          window.location.href = '/';
           break;
         case 403:
           // Forbidden - tidak punya akses
