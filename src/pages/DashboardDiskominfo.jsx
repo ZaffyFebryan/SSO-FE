@@ -22,7 +22,7 @@ const DashboardDiskominfo = () => {
 
       {/* ==== NAVBAR ==== */}
       <nav className="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 md:px-10 py-4 bg-white shadow-md">
-        
+
         {/* Logo */}
         <div className="flex items-center gap-3 font-semibold text-lg text-[#093757]">
           <div className="w-9 h-9 bg-[#093757] flex items-center justify-center rounded-xl">
@@ -33,25 +33,25 @@ const DashboardDiskominfo = () => {
           <span>Bispro Digitaltech</span>
         </div>
 
-        {/* Desktop menu */}
+        {/* Desktop Menu */}
         <ul className="hidden md:flex gap-6 text-sm font-medium text-[#093757]">
-          <li onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="hover:text-[#25577a] cursor-pointer">Home</li>
-          <li onClick={() => scrollToSection("applications")} className="hover:text-[#25577a] cursor-pointer">Applications</li>
-          <li onClick={() => scrollToSection("reports")} className="hover:text-[#25577a] cursor-pointer">Reports</li>
+          <li className="nav-link" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>Home</li>
+          <li className="nav-link" onClick={() => scrollToSection("applications")}>Applications</li>
+          <li className="nav-link" onClick={() => scrollToSection("reports")}>Reports</li>
         </ul>
 
-        {/* Right section */}
+        {/* Right Section */}
         <div className="hidden md:flex items-center gap-4">
           <input
             type="text"
             placeholder="Search..."
-            className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-[#25577a]"
+            className="input-search"
           />
           <button onClick={() => navigate("/profil-diskominfo")} className="btn-primary">Profil</button>
           <button onClick={handleLogout} className="btn-primary">Logout</button>
         </div>
 
-        {/* Mobile Hamburger Button */}
+        {/* Mobile Hamburger */}
         <button
           className="md:hidden text-[#093757] text-2xl"
           onClick={() => setMenuOpen(!menuOpen)}
@@ -62,29 +62,29 @@ const DashboardDiskominfo = () => {
 
       {/* ==== MOBILE MENU ==== */}
       {menuOpen && (
-        <div className="md:hidden fixed top-16 left-0 w-full bg-white shadow-lg p-6 space-y-4 z-40">
+        <div className="mobile-menu">
           <input
             type="text"
             placeholder="Search..."
-            className="border border-gray-300 rounded-md px-3 py-2 w-full text-sm"
+            className="input-search w-full"
           />
 
           <ul className="flex flex-col gap-4 text-[#093757] text-base">
-            <li onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="hover:text-[#25577a] cursor-pointer">Home</li>
-            <li onClick={() => scrollToSection("applications")} className="hover:text-[#25577a] cursor-pointer">Applications</li>
-            <li onClick={() => scrollToSection("reports")} className="hover:text-[#25577a] cursor-pointer">Reports</li>
+            <li className="nav-link" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>Home</li>
+            <li className="nav-link" onClick={() => scrollToSection("applications")}>Applications</li>
+            <li className="nav-link" onClick={() => scrollToSection("reports")}>Reports</li>
           </ul>
 
-          <button onClick={() => navigate("/profil-diskominfo")} className="w-full btn-primary mt-2">Profil</button>
-          <button onClick={handleLogout} className="w-full btn-primary">Logout</button>
+          <button onClick={() => navigate("/profil-diskominfo")} className="btn-primary w-full mt-2">Profil</button>
+          <button onClick={handleLogout} className="btn-primary w-full">Logout</button>
         </div>
       )}
 
-      {/* Spacer */}
+      {/* Spacer for Navbar */}
       <div className="h-20"></div>
 
       {/* ==== HERO SECTION ==== */}
-      <section className="flex flex-col md:flex-row items-center justify-between px-6 md:px-12 py-20 max-w-[1200px] mx-auto">
+      <section className="hero-section">
         <div className="max-w-lg text-[#093757] text-center md:text-left">
           <h1 className="text-3xl md:text-4xl font-bold mb-4">Diskominfo Dashboard</h1>
           <p className="text-[#294659] text-base">
@@ -92,17 +92,16 @@ const DashboardDiskominfo = () => {
           </p>
         </div>
 
-        <div className="mt-10 md:mt-0">
-          <img src="/images/dashboard.png" alt="dashboard" className="w-64 md:w-96 mx-auto" />
+        <div className="mt-10 md:mt-0 flex justify-center md:justify-end">
+          <img src="/images/dashboard.png" alt="dashboard" className="w-64 md:w-96" />
         </div>
       </section>
 
       {/* ==== ADMIN CARDS ==== */}
-      <section className="bg-[#eaf5f7] py-20">
-        <h2 className="text-3xl font-bold text-[#093757] text-center mb-12">Admin Actions</h2>
+      <section className="admin-section">
+        <h2 className="section-title">Admin Actions</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-3xl mx-auto w-full px-6">
-          
+        <div className="admin-grid">
           <div onClick={() => navigate("/manajemen-akun")} className="card-admin">
             <h3 className="card-title">Add User</h3>
             <p>Add new user data via the account registration form</p>
@@ -116,17 +115,17 @@ const DashboardDiskominfo = () => {
       </section>
 
       {/* ==== SERVICES ==== */}
-      <section id="applications" className="text-center py-16 bg-[#aee1ea] px-6">
-        <h2 className="text-3xl font-bold mb-12 text-[#093757]">Our Services Apps</h2>
+      <section id="applications" className="service-section">
+        <h2 className="section-title">Our Services Apps</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {[
+        <div className="service-grid">
+          {[ 
             { title: "SIPRIMA", logo: "/images/siprima.png", desc: "Aset Management System" },
             { title: "SINDRA", logo: "/images/sindra.png", desc: "Service Desk Management" },
             { title: "SIMANTIC", logo: "/images/simantic.png", desc: "Change & Configuration Management" },
           ].map((app, index) => (
             <div key={index} className="service-card">
-              <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
+              <div className="service-logo">
                 <img src={app.logo} className="w-14 h-14 object-contain" />
               </div>
               <h3 className="font-semibold text-xl text-[#093757]">{app.title}</h3>
@@ -137,13 +136,14 @@ const DashboardDiskominfo = () => {
       </section>
 
       {/* ==== REPORTS ==== */}
-      <section id="reports" className="py-20 text-center bg-white px-6">
-        <h2 className="text-3xl font-bold text-[#093757] mb-6">Why Organizations Trust Our Platform</h2>
+      <section id="reports" className="reports-section">
+        <h2 className="section-title mb-6">Why Organizations Trust Our Platform</h2>
+
         <p className="text-[#4a4a4a] max-w-3xl mx-auto mb-14">
           Streamline your IT operations with centralized control and enhanced efficiency.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="reports-grid">
           {[
             { title: "Unified Access", desc: "Single login to manage assets, tickets, and configuration." },
             { title: "Smart Automation", desc: "Automated workflows to reduce manual work and improve efficiency." },
@@ -159,13 +159,22 @@ const DashboardDiskominfo = () => {
       </section>
 
       {/* ==== FOOTER ==== */}
-      <footer className="bg-[#093757] text-[#b4cadd] py-12 px-8 md:px-24">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
+      <footer className="footer">
+        <div className="footer-grid">
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 bg-white rounded-md"></div>
-              <span className="font-semibold text-white">Bispro Digitaltech</span>
+            <div className="w-8 h-8 bg-white rounded-md flex items-center justify-center">
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 24 24" 
+                className="w-5 h-5 text-[#093757]"
+                fill="currentColor"
+              >
+                <path d="M12 2 4 5v6c0 5.25 3.25 10.25 8 11 4.75-.75 8-5.75 8-11V5l-8-3z"/>
+              </svg>
             </div>
+            <span className="font-semibold text-white">Bispro Digitaltech</span>
+          </div>
             <p className="text-sm">Streamlining government IT operations through integrated solutions.</p>
           </div>
 
@@ -198,7 +207,7 @@ const DashboardDiskominfo = () => {
           </div>
         </div>
 
-        <div className="text-center text-[#aacde6] text-sm mt-10 border-t border-[#225b7d] pt-4">
+        <div className="footer-bottom">
           © 2025 Pemkot Surabaya. All rights reserved.
         </div>
       </footer>

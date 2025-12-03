@@ -1,3 +1,93 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.nav-link {
+  @apply hover:text-[#25577a] cursor-pointer transition;
+}
+
+.input-search {
+  @apply border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-[#25577a];
+}
+
+.mobile-menu {
+  @apply md:hidden fixed top-16 left-0 w-full bg-white shadow-lg p-6 space-y-4 z-40;
+}
+
+.hero-section {
+  @apply flex flex-col md:flex-row items-center justify-between px-6 md:px-12 py-20 max-w-[1200px] mx-auto;
+}
+
+.admin-section {
+  @apply bg-[#eaf5f7] py-20;
+}
+
+.section-title {
+  @apply text-3xl font-bold text-[#093757] text-center mb-12;
+}
+
+.admin-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-10 max-w-4xl mx-auto w-full px-6 place-items-center;
+}
+
+.card-admin {
+  @apply bg-white shadow-md rounded-xl p-6 border border-gray-200 cursor-pointer
+         hover:shadow-lg transition w-full max-w-md;
+}
+
+.card-title {
+  @apply text-xl font-semibold text-[#093757] mb-2;
+}
+
+.service-section {
+  @apply text-center py-16 bg-[#aee1ea] px-6;
+}
+
+.service-grid {
+  @apply grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto place-items-center;
+}
+
+.service-card {
+  @apply bg-white rounded-xl p-8 shadow-md flex flex-col items-center gap-4 
+         hover:shadow-lg transition w-full max-w-xs;
+}
+
+.service-logo {
+  @apply w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center;
+}
+
+.reports-section {
+  @apply py-20 text-center bg-white px-6;
+}
+
+.reports-grid {
+  @apply grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto;
+}
+
+.report-card {
+  @apply bg-[#f4f9fb] p-8 rounded-xl shadow-md hover:shadow-lg transition;
+}
+
+.icon-circle {
+  @apply w-14 h-14 bg-[#d9edf2] text-xl flex items-center justify-center rounded-full mx-auto mb-4;
+}
+
+.footer {
+  @apply bg-[#093757] text-[#b4cadd] py-12 px-8 md:px-24;
+}
+
+.footer-grid {
+  @apply max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10;
+}
+
+.footer-title {
+  @apply font-semibold text-white mb-3;
+}
+
+.footer-list li {
+  @apply cursor-pointer hover:text-white transition text-sm mb-1;
+}
+
+.footer-bottom {
+  @apply text-center text-[#aacde6] text-sm mt-10 border-t border-[#225b7d] pt-4;
+}
