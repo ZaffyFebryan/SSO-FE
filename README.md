@@ -74,7 +74,7 @@ cp .env.example .env
 
 Edit `.env` file:
 ```env
-VITE_API_BASE_URL=http://127.0.0.1:8000/api
+VITE_API_BASE_URL=https://api.bispro.digitaltech.my.id/api
 VITE_API_TIMEOUT=10000
 ```
 

@@ -2,7 +2,7 @@ import axiosInstance from '../axios';
 
 /**
  * Master Data Service - Semua endpoint API Master Data V2
- * Base URL: http://127.0.0.1:8000/api/v2/master
+ * Base URL: https://api.bispro.digitaltech.my.id/api/v2/master
  */
 
 const masterService = {

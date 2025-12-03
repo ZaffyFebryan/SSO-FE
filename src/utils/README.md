@@ -17,7 +17,7 @@ utils/
 File ini berisi konfigurasi dasar untuk Axios instance yang digunakan di seluruh aplikasi.
 
 ### Features:
-- **Base URL**: `http://127.0.0.1:8000/api`
+- **Base URL**: `https://api.bispro.digitaltech.my.id/api`
 - **Timeout**: 10 detik
 - **Auto Token Injection**: Token otomatis ditambahkan ke setiap request dari localStorage
 - **Error Handling**: Global error handling untuk semua response

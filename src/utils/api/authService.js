@@ -2,7 +2,7 @@ import axiosInstance from '../axios';
 
 /**
  * Auth Service - Semua endpoint API Auth V2
- * Base URL: http://127.0.0.1:8000/api/v2/auth
+ * Base URL: https://api.bispro.digitaltech.my.id/api/v2/auth
  */
 
 const authService = {
