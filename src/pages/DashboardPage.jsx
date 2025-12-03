@@ -4,283 +4,247 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const DashboardPage = () => {
-    const navigate = useNavigate();
-    const { logout } = useAuth();
-    const [menuApps, setMenuApps] = useState([]);
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+  const [menuApps, setMenuApps] = useState([]);
+  const [navOpen, setNavOpen] = useState(false);
 
-    useEffect(() => {
-      // Ambil menu dari localStorage (disimpan saat login/refresh user)
-      const menuData = localStorage.getItem('menu');
-      if (menuData) {
-        try {
-          const parsedMenu = JSON.parse(menuData);
-          setMenuApps(parsedMenu);
-        } catch (err) {
-          console.error('Error parsing menu data:', err);
-        }
+  useEffect(() => {
+    const menuData = localStorage.getItem("menu");
+    if (menuData) {
+      try {
+        setMenuApps(JSON.parse(menuData));
+      } catch (err) {
+        console.error("Error parsing menu:", err);
       }
-    }, []);
+    }
+  }, []);
 
-    const handleLogout = async () => {
-      await logout();
-      navigate("/");
-    };
+  const handleLogout = async () => {
+    await logout();
+    navigate("/");
+  };
 
-  // fungsi untuk smooth scroll
   const scrollToSection = (id) => {
     const section = document.getElementById(id);
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth" });
-    }
+    if (section) section.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#e8f3f6] to-[#cde4ea] text-gray-800 font-sans">
-      {/* ==== NAVBAR ==== */}
-      <nav className="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-10 py-4 bg-white shadow-md backdrop-blur-sm">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#e8f3f6] to-[#cde4ea]">
+      {/* === NAVBAR === */}
+      <nav className="fixed top-0 left-0 w-full z-50 bg-white shadow-md px-5 md:px-10 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3 font-semibold text-lg text-[#093757]">
           <div className="w-9 h-9 bg-[#093757] flex items-center justify-center rounded-xl">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" className="w-5 h-5">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="white" className="w-5 h-5" viewBox="0 0 24 24">
               <path d="M12 2L4 5v6c0 5.25 3.25 10.25 8 11 4.75-.75 8-5.75 8-11V5l-8-3z" />
             </svg>
           </div>
           <span>Bispro Digitaltech</span>
         </div>
 
+        {/* Desktop menu */}
         <ul className="hidden md:flex gap-6 text-sm font-medium text-[#093757]">
-          <li
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="hover:text-[#25577a] cursor-pointer transition"
-          >
-            Home
-          </li>
-          <li
-            onClick={() => scrollToSection("applications")}
-            className="hover:text-[#25577a] cursor-pointer transition"
-          >
-            Applications
-          </li>
-          <li
-            onClick={() => scrollToSection("reports")}
-            className="hover:text-[#25577a] cursor-pointer transition"
-          >
-            Reports
-          </li>
+          <li onClick={() => scrollToSection("top")} className="hover:text-[#25577a] cursor-pointer">Home</li>
+          <li onClick={() => scrollToSection("applications")} className="hover:text-[#25577a] cursor-pointer">Applications</li>
+          <li onClick={() => scrollToSection("reports")} className="hover:text-[#25577a] cursor-pointer">Reports</li>
         </ul>
 
-    <div className="flex items-center gap-4">
-      <input
-        type="text"
-        placeholder="Search..."
-        className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#25577a]"
-      />
-      <button
-        className="bg-[#093757] text-white text-sm px-5 py-2 rounded-md hover:bg-[#0e4f76] transition"
-        onClick={() => navigate("/profil-user")}
-      >
-        Profil
-      </button>
+        {/* Desktop actions */}
+        <div className="hidden md:flex items-center gap-4">
+          <input
+            type="text"
+            placeholder="Search..."
+            className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-[#25577a]"
+          />
+          <button onClick={() => navigate("/profil-user")} className="bg-[#093757] text-white px-5 py-2 text-sm rounded-md">
+            Profil
+          </button>
+          <button onClick={handleLogout} className="bg-[#093757] text-white px-5 py-2 text-sm rounded-md">
+            Logout
+          </button>
+        </div>
 
-      <button
-        className="bg-[#093757] text-white text-sm px-5 py-2 rounded-md hover:bg-[#0e4f76] transition"
-        onClick={handleLogout}
-      >
-        Logout
-      </button>
-
-    </div>
-
+        {/* Mobile menu button */}
+        <button
+          className="md:hidden text-[#093757] text-2xl"
+          onClick={() => setNavOpen(!navOpen)}
+        >
+          ☰
+        </button>
       </nav>
 
-      {/* ==== SPACER supaya konten tidak tertutup navbar ==== */}
-      <div className="h-20"></div>
+      {/* Mobile dropdown */}
+      {navOpen && (
+        <div className="md:hidden bg-white shadow-md px-5 py-4 space-y-4">
+          <ul className="space-y-3 text-[#093757] font-medium">
+            <li onClick={() => scrollToSection("top")} className="cursor-pointer">Home</li>
+            <li onClick={() => scrollToSection("applications")} className="cursor-pointer">Applications</li>
+            <li onClick={() => scrollToSection("reports")} className="cursor-pointer">Reports</li>
+          </ul>
 
-      {/* ==== HERO SECTION ==== */}
-      <section className="flex flex-col md:flex-row items-center justify-between px-12 py-20 max-w-[1200px] mx-auto w-full">
-        <div className="max-w-lg text-[#093757]">
-          <h1 className="text-4xl font-bold mb-4 leading-tight">
+          <div className="flex flex-col gap-3 mt-4">
+            <input type="text" placeholder="Search..." className="border rounded-md px-3 py-2" />
+            <button onClick={() => navigate("/profil-user")} className="bg-[#093757] text-white py-2 rounded-md">
+              Profil
+            </button>
+            <button onClick={handleLogout} className="bg-[#093757] text-white py-2 rounded-md">
+              Logout
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Spacer */}
+      <div id="top" className="h-20"></div>
+
+      {/* === HERO === */}
+      <section className="flex flex-col md:flex-row items-center justify-between px-6 md:px-12 py-16 max-w-[1200px] mx-auto gap-10">
+        <div className="text-[#093757] md:w-1/2">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
             Integrated IT Ecosystem in One Dashboard
           </h1>
           <p className="text-[#294659] text-base leading-relaxed">
             Access and manage assets, tickets, and configurations seamlessly with one secure login.
           </p>
         </div>
-        <div className="mt-10 md:mt-0">
-          <img
-            src="src/assets/dashboard.png"
-            alt="Dashboard preview"
-          />
-        </div>
+
+        <img
+          src="src/assets/dashboard.png"
+          alt="dashboard"
+          className="w-full md:w-1/2 max-w-md"
+        />
       </section>
 
-      {/* ==== OUR SERVICES (tambahkan ID agar bisa discroll ke sini) ==== */}
-      <section id="applications" className="text-center py-16 bg-[#aee1ea]">
-        <h2 className="text-3xl font-bold mb-12 text-[#093757]">Our Services Apps</h2>
-        
+      {/* === APPLICATIONS === */}
+      <section id="applications" className="text-center py-16 bg-[#aee1ea] px-6">
+        <h2 className="text-3xl font-bold mb-10 text-[#093757]">Our Services Apps</h2>
+
         {menuApps.length === 0 ? (
-          <div className="text-[#294659] text-lg">
-            Tidak ada aplikasi yang tersedia untuk user Anda.
-          </div>
+          <p className="text-[#294659] text-lg">Tidak ada aplikasi untuk user Anda.</p>
         ) : (
-          <div className="grid md:grid-cols-3 gap-10 px-8 md:px-24 max-w-6xl mx-auto">
-            {menuApps.map((app, index) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {menuApps.map((app, i) => (
               <div
-                key={index}
-                className="bg-white rounded-xl shadow-md hover:shadow-xl transition p-10 flex flex-col items-center gap-4 border border-gray-200 cursor-pointer"
-                onClick={() => app.url && window.open(app.url, '_blank')}
+                key={i}
+                className="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition border cursor-pointer flex flex-col items-center"
+                onClick={() => app.url && window.open(app.url, "_blank")}
               >
-                <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
+                <div className="w-20 h-20 bg-gray-100 rounded-lg flex justify-center items-center">
                   {app.logo ? (
-                    <img
-                      src={app.logo}
-                      alt={app.name}
-                      className="w-16 h-16 object-contain"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                        e.target.parentElement.innerHTML = '<span class="text-3xl">📱</span>';
-                      }}
-                    />
+                    <img className="w-14 h-14 object-contain" src={app.logo} alt={app.name} />
                   ) : (
                     <span className="text-3xl">📱</span>
                   )}
                 </div>
-                <h3 className="font-semibold text-xl text-[#093757]">{app.name || 'App'}</h3>
-                <p className="text-sm text-[#294659] mt-1">{app.description || '-'}</p>
+                <h3 className="mt-4 font-semibold text-xl">{app.name}</h3>
+                <p className="text-sm text-gray-600">{app.description || "-"}</p>
               </div>
             ))}
           </div>
         )}
       </section>
 
-      {/* ==== REPORT SECTION ==== */}
-      <section id="reports" className="py-20 text-center bg-white">
+      {/* === REPORTS === */}
+      <section id="reports" className="py-16 px-6 bg-white text-center">
         <h2 className="text-3xl font-bold text-[#093757] mb-6">
-          Why Organizations Trust Our Integrated Platform
+          Why Organizations Trust Our Platform
         </h2>
-        <p className="text-[#4a4a4a] max-w-3xl mx-auto mb-14 text-base">
-          Streamline your IT operations with centralized control, enhanced efficiency, and complete SLA compliance through our comprehensive integration solution.
+        <p className="max-w-3xl mx-auto mb-12 text-[#4a4a4a]">
+          Streamline your IT operations with centralized control and full SLA compliance.
         </p>
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {[
-            {
-              title: "Unified Access",
-              desc: "Single login to manage assets, tickets, and configuration data across all your IT systems seamlessly.",
-            },
-            {
-              title: "Smart Automation",
-              desc: "Workflow automation following ITIL standards to reduce manual work and improve operational efficiency.",
-            },
-            {
-              title: "Secure & Reliable",
-              desc: "Enterprise-grade authentication and comprehensive audit logs ensure maximum security and compliance.",
-            },
-          ].map((item, index) => (
-            <div
-              key={index}
-              className="bg-[#dff0f3] p-8 rounded-lg shadow-md hover:shadow-lg transition flex flex-col items-center text-center"
-            >
-              <div className="w-12 h-12 bg-[#093757] text-white rounded-full flex items-center justify-center mb-4 text-lg">
+            { title: "Unified Access", desc: "Manage assets and tickets with one login." },
+            { title: "Smart Automation", desc: "Follow ITIL standards to improve efficiency." },
+            { title: "Secure & Reliable", desc: "Enterprise-grade authentication and logs." },
+          ].map((item, i) => (
+            <div key={i} className="bg-[#dff0f3] p-8 rounded-lg shadow-md">
+              <div className="w-12 h-12 bg-[#093757] text-white rounded-full flex justify-center items-center mx-auto text-lg">
                 ⚙️
               </div>
-              <h3 className="font-semibold text-[#093757] mb-2">{item.title}</h3>
-              <p className="text-[#4a4a4a] text-sm">{item.desc}</p>
+              <h3 className="font-semibold mt-4">{item.title}</h3>
+              <p className="text-sm text-gray-700 mt-2">{item.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* STATISTICS */}
+      {/* === STATISTICS === */}
       <section className="bg-[#eaf5f7] py-12">
-        <div className="flex flex-wrap justify-center gap-16 text-center text-[#093757]">
+        <div className="flex flex-wrap justify-center gap-10 text-center">
           {[
             { icon: "📁", title: "10K+", subtitle: "Managed Assets" },
-            { icon: "✅", title: "98%", subtitle: "SLA Compliance Rate" },
+            { icon: "✅", title: "98%", subtitle: "SLA Compliance" },
             { icon: "👥", title: "500+", subtitle: "Active Users" },
-            { icon: "⏰", title: "24/7", subtitle: "Monitoring Enabled" },
-          ].map((stat, idx) => (
-            <div key={idx} className="flex flex-col items-center space-y-1 min-w-[140px]">
+            { icon: "⏰", title: "24/7", subtitle: "Monitoring" },
+          ].map((stat, i) => (
+            <div key={i}>
               <div className="text-3xl">{stat.icon}</div>
               <div className="text-xl font-bold">{stat.title}</div>
-              <div className="text-sm">{stat.subtitle}</div>
+              <p className="text-sm">{stat.subtitle}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* INFO CARDS */}
-      <section className="max-w-6xl mx-auto px-8 md:px-24 py-20 grid md:grid-cols-3 gap-8 w-full">
+      {/* === INFO CARDS === */}
+      <section className="max-w-6xl mx-auto px-6 md:px-24 py-16 grid grid-cols-1 md:grid-cols-3 gap-8">
         {[
-          {
-            title: "Asset Management",
-            desc: "Track, audit, and maintain government inventory with comprehensive asset lifecycle management and automated reporting.",
-          },
-          {
-            title: "Service Desk",
-            desc: "Manage tickets, assign technicians, and monitor SLA compliance with intelligent routing and automated escalations.",
-          },
-          {
-            title: "Change & Configuration",
-            desc: "Log RFCs, control versioning, and review impact changes with comprehensive approval workflows and rollback capabilities.",
-          },
-        ].map((app, i) => (
-          <div
-            key={i}
-            className="bg-[#dff0f3] p-8 rounded-lg shadow-md hover:shadow-lg transition cursor-default"
-          >
-            <h3 className="text-lg font-semibold mb-2 text-[#093757]">{app.title}</h3>
-            <p className="text-sm text-[#294659] leading-relaxed">{app.desc}</p>
-            <a
-              href="#"
-              className="text-[#093757] text-sm font-semibold mt-4 inline-block hover:underline"
-            >
-            </a>
+          { title: "Asset Management", desc: "Track, audit, and maintain assets." },
+          { title: "Service Desk", desc: "Manage tickets & SLA performance." },
+          { title: "Change & Configuration", desc: "Versioning, RFC logs, approval flows." },
+        ].map((item, i) => (
+          <div key={i} className="bg-[#dff0f3] p-8 rounded-lg shadow-md">
+            <h3 className="font-semibold mb-2 text-[#093757]">{item.title}</h3>
+            <p className="text-sm text-[#294659]">{item.desc}</p>
           </div>
         ))}
       </section>
 
-      {/* FOOTER */}
-      <footer className="bg-[#093757] text-[#b4cadd] py-12 px-8 md:px-24">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-4 gap-10">
+      {/* === FOOTER === */}
+      <footer className="bg-[#093757] text-[#b4cadd] py-12 px-6 md:px-24">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 max-w-6xl mx-auto">
           <div>
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-white rounded-md"></div>
-              <span className="font-semibold text-white">Bispro Digitaltech</span>
+              <span className="text-white font-semibold">Bispro Digitaltech</span>
             </div>
-            <p className="text-sm">
-              Streamlining government IT operations through integrated solutions and secure access management.
+            <p className="text-sm mt-3">
+              Streamlining government IT operations with secure integrated solutions.
             </p>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2 text-white">Quick Links</h4>
-            <ul className="text-sm space-y-1">
-              <li className="hover:text-white cursor-pointer">Dashboard</li>
-              <li className="hover:text-white cursor-pointer">Applications</li>
-              <li className="hover:text-white cursor-pointer">Reports</li>
-              <li className="hover:text-white cursor-pointer">Documentation</li>
+            <h4 className="font-semibold text-white mb-2">Quick Links</h4>
+            <ul className="space-y-1 text-sm">
+              <li>Dashboard</li>
+              <li>Applications</li>
+              <li>Reports</li>
+              <li>Documentation</li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2 text-white">Support</h4>
-            <ul className="text-sm space-y-1">
-              <li className="hover:text-white cursor-pointer">Help Center</li>
-              <li className="hover:text-white cursor-pointer">Contact Us</li>
-              <li className="hover:text-white cursor-pointer">System Status</li>
-              <li className="hover:text-white cursor-pointer">Training</li>
+            <h4 className="font-semibold text-white mb-2">Support</h4>
+            <ul className="space-y-1 text-sm">
+              <li>Help Center</li>
+              <li>Contact Us</li>
+              <li>System Status</li>
+              <li>Training</li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2 text-white">Contact Info</h4>
-            <ul className="text-sm space-y-1">
-              <li>support@gov-sso.com</li>
-              <li>+1 (555) 123-4567</li>
-            </ul>
+            <h4 className="font-semibold text-white mb-2">Contact Info</h4>
+            <p className="text-sm">support@gov-sso.com</p>
+            <p className="text-sm">+1 (555) 123-4567</p>
           </div>
         </div>
-        <div className="text-center text-[#aacde6] text-sm mt-10 border-t border-[#225b7d] pt-4">
-          © 2025 Pemkot Surabaya. All rights reserved. | Privacy Policy | Terms of Service
+
+        <div className="text-center mt-10 text-sm border-t border-[#1f5c82] pt-4">
+          © 2025 Pemkot Surabaya. All rights reserved.
         </div>
       </footer>
     </div>
