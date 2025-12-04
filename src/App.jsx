@@ -15,6 +15,8 @@ import DataUser from "./pages/DataUser.jsx";
 import DetailDataUser from "./pages/DetailDataUser.jsx";
 import UpdateDataUser from "./pages/UpdateDataUser.jsx";
 
+import VerifyEmailOTP from "./pages/VerifyEmailOTP.jsx";
+
 export default function App() {
   return (
     <AuthProvider>
@@ -25,6 +27,8 @@ export default function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/verify-code" element={<VerifyCode />} />
         <Route path="/set-new-password" element={<SetNewPassword />} />
+
+        <Route path="/verify-email-otp" element={<VerifyEmailOTP />} />
 
         {/* Protected routes - perlu authentication */}
         <Route path="/dashboard" element={
