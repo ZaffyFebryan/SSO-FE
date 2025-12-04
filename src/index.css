@@ -49,7 +49,7 @@
 
 .service-card {
   @apply bg-white rounded-xl p-8 shadow-md flex flex-col items-center gap-4 
-         hover:shadow-lg transition w-full max-w-xs;
+         hover:shadow-lg transition w-full max-w-xs cursor-pointer;
 }
 
 .service-logo {

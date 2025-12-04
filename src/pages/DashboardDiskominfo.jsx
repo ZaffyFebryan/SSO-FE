@@ -120,13 +120,17 @@ const DashboardDiskominfo = () => {
 
         <div className="service-grid">
           {[ 
-            { title: "SIPRIMA", logo: "/images/siprima.png", desc: "Aset Management System" },
-            { title: "SINDRA", logo: "/images/sindra.png", desc: "Service Desk Management" },
-            { title: "SIMANTIC", logo: "/images/simantic.png", desc: "Change & Configuration Management" },
+            { title: "SIPRIMA", logo: "/images/siprima.png", desc: "Aset Management System", url: "https://api.siprima.digitaltech.my.id" },
+            { title: "SINDRA", logo: "/images/sindra.png", desc: "Service Desk Management", url: "https://api-sindra.okkyprojects.com" },
+            { title: "SIMANTIC", logo: "/images/simantic.png", desc: "Change & Configuration Management", url: "https://simantic.online" },
           ].map((app, index) => (
-            <div key={index} className="service-card">
+            <div 
+              key={index} 
+              className="service-card cursor-pointer"
+              onClick={() => app.url && window.open(app.url, "_blank")}
+            >
               <div className="service-logo">
-                <img src={app.logo} className="w-14 h-14 object-contain" />
+                <img src={app.logo} className="w-14 h-14 object-contain" alt={app.title} />
               </div>
               <h3 className="font-semibold text-xl text-[#093757]">{app.title}</h3>
               <p className="text-sm text-[#294659]">{app.desc}</p>

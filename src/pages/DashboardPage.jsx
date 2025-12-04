@@ -2,22 +2,41 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import authService from "../utils/api/authService";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [menuApps, setMenuApps] = useState([]);
   const [navOpen, setNavOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const menuData = localStorage.getItem("menu");
-    if (menuData) {
+    const fetchMenuData = async () => {
       try {
-        setMenuApps(JSON.parse(menuData));
-      } catch (err) {
-        console.error("Error parsing menu:", err);
+        const response = await authService.getMe();
+        if (response.success && response.data.menu) {
+          setMenuApps(response.data.menu);
+          // Simpan menu ke localStorage untuk fallback
+          localStorage.setItem("menu", JSON.stringify(response.data.menu));
+        }
+      } catch (error) {
+        console.error("Error fetching menu:", error);
+        // Fallback ke localStorage jika API gagal
+        const menuData = localStorage.getItem("menu");
+        if (menuData) {
+          try {
+            setMenuApps(JSON.parse(menuData));
+          } catch (err) {
+            console.error("Error parsing menu:", err);
+          }
+        }
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+
+    fetchMenuData();
   }, []);
 
   const handleLogout = async () => {
@@ -120,7 +139,9 @@ const DashboardPage = () => {
       <section id="applications" className="text-center py-16 bg-[#aee1ea] px-6">
         <h2 className="text-3xl font-bold mb-10 text-[#093757]">Our Services Apps</h2>
 
-        {menuApps.length === 0 ? (
+        {loading ? (
+          <p className="text-[#294659] text-lg">Loading applications...</p>
+        ) : menuApps.length === 0 ? (
           <p className="text-[#294659] text-lg">Tidak ada aplikasi untuk user Anda.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -132,12 +153,19 @@ const DashboardPage = () => {
               >
                 <div className="w-20 h-20 bg-gray-100 rounded-lg flex justify-center items-center">
                   {app.logo ? (
-                    <img className="w-14 h-14 object-contain" src={app.logo} alt={app.name} />
-                  ) : (
-                    <span className="text-3xl">📱</span>
-                  )}
+                    <img 
+                      className="w-14 h-14 object-contain" 
+                      src={`/images/${app.logo}`} 
+                      alt={app.name}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'block';
+                      }}
+                    />
+                  ) : null}
+                  <span className="text-3xl" style={{ display: app.logo ? 'none' : 'block' }}>📱</span>
                 </div>
-                <h3 className="mt-4 font-semibold text-xl">{app.name}</h3>
+                <h3 className="mt-4 font-semibold text-xl text-[#093757]">{app.name}</h3>
                 <p className="text-sm text-gray-600">{app.description || "-"}</p>
               </div>
             ))}
