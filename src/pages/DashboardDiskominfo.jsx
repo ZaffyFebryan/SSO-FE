@@ -114,29 +114,42 @@ const DashboardDiskominfo = () => {
         </div>
       </section>
 
-      {/* ==== SERVICES ==== */}
-      <section id="applications" className="service-section">
-        <h2 className="section-title">Our Services Apps</h2>
+      {/* === APPLICATIONS === */}
+      <section id="applications" className="text-center py-16 bg-[#aee1ea] px-6">
+        <h2 className="text-3xl font-bold mb-10 text-[#093757]">Our Services Apps</h2>
 
-        <div className="service-grid">
-          {[ 
-            { title: "SIPRIMA", logo: "/images/siprima.png", desc: "Aset Management System", url: "https://api.siprima.digitaltech.my.id" },
-            { title: "SINDRA", logo: "/images/sindra.png", desc: "Service Desk Management", url: "https://api-sindra.okkyprojects.com" },
-            { title: "SIMANTIC", logo: "/images/simantic.png", desc: "Change & Configuration Management", url: "https://simantic.online" },
-          ].map((app, index) => (
-            <div 
-              key={index} 
-              className="service-card cursor-pointer"
-              onClick={() => app.url && window.open(app.url, "_blank")}
-            >
-              <div className="service-logo">
-                <img src={app.logo} className="w-14 h-14 object-contain" alt={app.title} />
+        {loading ? (
+          <p className="text-[#294659] text-lg">Loading applications...</p>
+        ) : menuApps.length === 0 ? (
+          <p className="text-[#294659] text-lg">Tidak ada aplikasi untuk user Anda.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {menuApps.map((app, i) => (
+              <div
+                key={i}
+                className="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition border cursor-pointer flex flex-col items-center"
+                onClick={() => app.url && window.open(app.url, "_blank")}
+              >
+                <div className="w-20 h-20 bg-gray-100 rounded-lg flex justify-center items-center">
+                  {app.logo ? (
+                    <img 
+                      className="w-14 h-14 object-contain" 
+                      src={`/images/${app.logo}`} 
+                      alt={app.name}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'block';
+                      }}
+                    />
+                  ) : null}
+                  <span className="text-3xl" style={{ display: app.logo ? 'none' : 'block' }}>📱</span>
+                </div>
+                <h3 className="mt-4 font-semibold text-xl text-[#093757]">{app.name}</h3>
+                <p className="text-sm text-gray-600">{app.description || "-"}</p>
               </div>
-              <h3 className="font-semibold text-xl text-[#093757]">{app.title}</h3>
-              <p className="text-sm text-[#294659]">{app.desc}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* ==== REPORTS ==== */}
