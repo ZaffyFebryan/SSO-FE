@@ -1,11 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import authService from "../utils/api/authService";
 
 const DashboardDiskominfo = () => {
   const navigate = useNavigate();
+  const [menuApps, setMenuApps] = useState([]);
   const { logout } = useAuth();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);  
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+      const fetchMenuData = async () => {
+        try {
+          const response = await authService.getMe();
+          if (response.success && response.data.menu) {
+            setMenuApps(response.data.menu);
+            // Simpan menu ke localStorage untuk fallback
+            localStorage.setItem("menu", JSON.stringify(response.data.menu));
+          }
+        } catch (error) {
+          console.error("Error fetching menu:", error);
+          // Fallback ke localStorage jika API gagal
+          const menuData = localStorage.getItem("menu");
+          if (menuData) {
+            try {
+              setMenuApps(JSON.parse(menuData));
+            } catch (err) {
+              console.error("Error parsing menu:", err);
+            }
+          }
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchMenuData();
+    }, []);
 
   const handleLogout = async () => {
     await logout();
